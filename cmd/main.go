@@ -19,7 +19,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err := databases.NewDbConnection(databases.Config{
+	db, err := databases.New(databases.Config{
 		Debug:        os.Getenv("DEBUG") == "true",
 		DBType:       os.Getenv("DB_TYPE"),
 		DSN:          os.Getenv("DATABASE_URL"),

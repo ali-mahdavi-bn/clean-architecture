@@ -5,7 +5,8 @@ import (
 )
 
 type BaseRepository[E Entity] interface {
-	ByID(ctx context.Context, id uint) (E, error)
-	ByField(ctx context.Context, field string, value interface{}) (E, error)
-	Add(ctx context.Context, model E) error
+	FindByID(ctx context.Context, id uint) (E, error)
+	FindByField(ctx context.Context, field string, value interface{}) (E, error)
+	Remove(ctx context.Context, model E) error
+	Save(ctx context.Context, model E) error
 }

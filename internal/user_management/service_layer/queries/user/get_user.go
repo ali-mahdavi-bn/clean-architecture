@@ -7,9 +7,8 @@ import (
 )
 
 func ViewGetUser(db *gorm.DB, id uint) (*entities.User, error) {
-	user := &entities.User{}
-	err := db.First(user, id).Error
-	if err != nil {
+	user := new(entities.User)
+	if err := db.First(user, id).Error; err != nil {
 		return nil, errors.NotFound("User.NotFound")
 	}
 	return user, nil

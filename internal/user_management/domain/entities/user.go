@@ -2,12 +2,13 @@ package entities
 
 import (
 	"clean-hex/pkg/errors"
+	"clean-hex/pkg/framwork/adapter"
 )
 
 type User struct {
-	UserName string
+	adapter.BaseEntity
 	Age      int
-	ID       uint `gorm:"primaryKey"`
+	UserName string
 }
 
 func NewUser(UserName string, Age int) (*User, error) {
@@ -23,15 +24,15 @@ func NewUser(UserName string, Age int) (*User, error) {
 	return user, nil
 }
 
-func (u *User) GetID() uint {
-	return u.ID
-}
-
-func (u *User) Update(Name string, Age int) (*User, error) {
-	u.UserName = Name
-	if Age < 18 {
-		return nil, errors.BadRequest("User.AgeInvalid")
+func (u *User) Update(UserName string, Age int) error {
+	if UserName == "admin" {
+		return errors.BadRequest("User.Invalid")
 	}
+	if Age < 18 {
+		return errors.BadRequest("User.AgeInvalid")
+	}
+
+	u.UserName = UserName
 	u.Age = Age
-	return u, nil
+	return nil
 }

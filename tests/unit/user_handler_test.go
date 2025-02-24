@@ -4,13 +4,13 @@ import (
 	"clean-hex/internal/user_management/domain"
 	"clean-hex/internal/user_management/domain/entities"
 	"clean-hex/pkg/errors"
-	"clean-hex/tests"
+	"clean-hex/tests/mocks"
 	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var bus = tests.MockUserManagementBootstrapTestApp()
+var bus = mocks.MockUserManagementBootstrapTestApp()
 
 func TestAddUser(t *testing.T) {
 	command, ctx := CreateUserCommandCreationMethod("NewAli", 0)

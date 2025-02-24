@@ -13,16 +13,19 @@ func NewGormRepository[E Entity](db *gorm.DB) BaseRepository[E] {
 	return &gormRepository[E]{db: db}
 }
 
-func (c *gormRepository[E]) ByID(ctx context.Context, id uint) (E, error) {
-	return c.ByField(ctx, "id", id)
+func (c *gormRepository[E]) FindByID(ctx context.Context, id uint) (E, error) {
+	return c.FindByField(ctx, "id", id)
 }
 
-func (c *gormRepository[E]) ByField(ctx context.Context, field string, value interface{}) (E, error) {
+func (c *gormRepository[E]) FindByField(ctx context.Context, field string, value interface{}) (E, error) {
 	var e E
 	err := c.db.WithContext(ctx).Where(field+"=?", value).First(&e).Error
 	return e, err
 }
 
-func (c *gormRepository[E]) Add(ctx context.Context, model E) error {
-	return c.db.WithContext(ctx).Create(model).Error
+func (c *gormRepository[E]) Remove(ctx context.Context, model E) error {
+	return c.db.WithContext(ctx).Delete(model).Error
+}
+func (c *gormRepository[E]) Save(ctx context.Context, model E) error {
+	return c.db.WithContext(ctx).Save(model).Error
 }

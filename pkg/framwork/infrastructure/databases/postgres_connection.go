@@ -24,7 +24,7 @@ type Config struct {
 	TablePrefix  string
 }
 
-func NewDbConnection(cfg Config) (*gorm.DB, error) {
+func New(cfg Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch strings.ToLower(cfg.DBType) {

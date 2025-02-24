@@ -38,4 +38,34 @@ func RegisterV1Routers(bus *messagebus.MessageBus, g *gin.RouterGroup) {
 		ginx.ResSuccess(c, result)
 	})
 
+	r.PUT("/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		ctx := c.Request.Context()
+		item := new(domain.UpdateUserCommand)
+		if err := ginx.ParseJSON(c, item); err != nil {
+			ginx.ResError(c, err)
+			return
+		}
+		item.UserId = cast.ToUint(id)
+
+		result, err := bus.Handle(ctx, *item)
+		if err != nil {
+			ginx.ResError(c, err)
+			return
+		}
+		ginx.ResSuccess(c, result)
+	})
+	r.DELETE("/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		ctx := c.Request.Context()
+		item := new(domain.DeleteUserCommand)
+		item.UserId = cast.ToUint(id)
+		result, err := bus.Handle(ctx, *item)
+		if err != nil {
+			ginx.ResError(c, err)
+			return
+		}
+		ginx.ResSuccess(c, result)
+	})
+
 }

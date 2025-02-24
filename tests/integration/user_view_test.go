@@ -4,20 +4,17 @@ import (
 	"clean-hex/internal/user_management/domain"
 	"clean-hex/internal/user_management/domain/entities"
 	queries "clean-hex/internal/user_management/service_layer/queries/user"
-	"clean-hex/tests"
 	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var bus = tests.MockUserManagementBootstrapTestApp()
-
 func TestViewGetUser(t *testing.T) {
-	command, ctx := CreateUserCommandCreationMethod("", 0)
+	command, ctx := CreateUserCommandCreationMethod("NewAli", 0)
 
-	result, err := bus.Handle(ctx, command)
+	result, err := Bus.Handle(ctx, command)
 	newUser, ok := result.(*entities.User)
-	user, err := queries.ViewGetUser(bus.DB, newUser.ID)
+	user, err := queries.ViewGetUser(Bus.DB, newUser.ID)
 	assert.Nil(t, err)
 	assert.True(t, ok)
 	assert.Equal(t, user.ID, newUser.ID)

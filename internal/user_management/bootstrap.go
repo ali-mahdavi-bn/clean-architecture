@@ -13,6 +13,8 @@ func Bootstrap(db *gorm.DB) *messagebus.MessageBus {
 
 	bus := messagebus.NewMessageBus(db)
 	bus.Register(domain.CreateUserCommand{}, handlers.NewCreateUserHandler(user_repo))
+	bus.Register(domain.UpdateUserCommand{}, handlers.NewUpdateUserHandler(user_repo))
+	bus.Register(domain.DeleteUserCommand{}, handlers.NewDeleteUserHandler(user_repo))
 
 	return bus
 }

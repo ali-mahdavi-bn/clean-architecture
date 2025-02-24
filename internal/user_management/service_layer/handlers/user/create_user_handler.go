@@ -10,17 +10,17 @@ import (
 )
 
 type CreateUserHandler struct {
-	user_repo repositories.UserRepository
+	userRepo repositories.UserRepository
 }
 
-func NewCreateUserHandler(user_repo repositories.UserRepository) *CreateUserHandler {
-	return &CreateUserHandler{user_repo: user_repo}
+func NewCreateUserHandler(userRepo repositories.UserRepository) *CreateUserHandler {
+	return &CreateUserHandler{userRepo: userRepo}
 }
 
 func (u *CreateUserHandler) Handle(ctx context.Context, cmd types.Command) (any, error) {
 	command := cmd.(domain.CreateUserCommand)
 
-	_, err := u.user_repo.ByUserName(ctx, command.UserName)
+	_, err := u.userRepo.FindByUserName(ctx, command.UserName)
 	if err == nil {
 		return nil, errors.BadRequest("User.AlreadyExists")
 	}
@@ -30,7 +30,7 @@ func (u *CreateUserHandler) Handle(ctx context.Context, cmd types.Command) (any,
 		return nil, err
 	}
 
-	err = u.user_repo.Add(ctx, user)
+	err = u.userRepo.Save(ctx, user)
 	if err != nil {
 		return nil, errors.BadRequest("CanNot.Operation")
 	}
