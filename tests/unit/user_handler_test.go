@@ -3,7 +3,7 @@ package unit
 import (
 	"clean-hex/internal/user_management/domain"
 	"clean-hex/internal/user_management/domain/entities"
-	"clean-hex/pkg/errors"
+	"clean-hex/pkg/framwork/errors"
 	"clean-hex/tests/mocks"
 	"context"
 	"github.com/stretchr/testify/assert"
@@ -17,8 +17,8 @@ func TestAddUser(t *testing.T) {
 
 	result, err := bus.Handle(ctx, command)
 	user, ok := result.(*entities.User)
-
 	assert.Nil(t, err)
+	assert.True(t, true)
 	assert.True(t, ok)
 	assert.Equal(t, user.UserName, command.UserName)
 	assert.Equal(t, user.Age, command.Age)
@@ -33,7 +33,7 @@ func TestForUserExisting(t *testing.T) {
 	assert.Nil(t, result)
 }
 
-func CreateUserCommandCreationMethod(userName string, age int) (domain.CreateUserCommand, context.Context) {
+func CreateUserCommandCreationMethod(userName string, age int) (*domain.CreateUserCommand, context.Context) {
 	if userName == "" {
 		userName = "ali"
 	}
@@ -41,7 +41,7 @@ func CreateUserCommandCreationMethod(userName string, age int) (domain.CreateUse
 		age = 20
 	}
 	ctx := context.Background()
-	command := domain.CreateUserCommand{
+	command := &domain.CreateUserCommand{
 		UserName: userName,
 		Age:      age,
 	}

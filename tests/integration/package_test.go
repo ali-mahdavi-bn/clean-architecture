@@ -3,16 +3,20 @@ package integration
 import (
 	"clean-hex/internal/user_management"
 	"clean-hex/pkg/framwork/infrastructure/databases"
+	"clean-hex/pkg/framwork/infrastructure/redisx"
+	"clean-hex/pkg/framwork/service_layer/cache"
 	"clean-hex/pkg/framwork/service_layer/messagebus"
 	"clean-hex/tests/mocks"
 	testutil "clean-hex/tests/testutility"
 	"context"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"os"
 	"testing"
 )
 
 var Bus *messagebus.MessageBus
+var RedisStore cache.Store
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
@@ -33,6 +37,16 @@ func TestMain(m *testing.M) {
 		logrus.WithError(err).Fatal("Failed to start Sqlite test server")
 		os.Exit(1)
 	}
+	redisConnection, err := redisx.NewRedisConnection(ctx, &redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		Username: "ali",
+		DB:       0,
+	})
+	if err != nil {
+		panic(err)
+	}
+	RedisStore = cache.NewRedisStore(redisConnection)
 
 	// Migration
 	userManagementModule := user_management.UserManagementModule{

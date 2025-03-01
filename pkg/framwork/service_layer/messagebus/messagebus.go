@@ -1,11 +1,11 @@
 package messagebus
 
 import (
+	"clean-hex/internal"
+	"clean-hex/pkg/framwork/helpers/is"
 	"clean-hex/pkg/framwork/service_layer/types"
-	"clean-hex/pkg/helpers"
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"reflect"
 )
 
@@ -15,33 +15,31 @@ var (
 )
 
 type MessageBus struct {
-	DB       *gorm.DB
+	Uow      internal.UnitOfWorkImp
 	handlers map[string]types.HandlerType
 }
 
-func NewMessageBus(db *gorm.DB) *MessageBus {
+func NewMessageBus(uow internal.UnitOfWorkImp) *MessageBus {
 	return &MessageBus{
 		handlers: make(map[string]types.HandlerType),
-		DB:       db,
+		Uow:      uow,
 	}
 }
 
 func (m *MessageBus) Register(cmd types.Command, handler types.HandlerType) {
-	typeName := reflect.TypeOf(cmd).String()
-	m.handlers[typeName] = handler
+	m.handlers[reflect.TypeOf(cmd).String()] = handler
 }
 
 func (m *MessageBus) Handle(ctx context.Context, cmd types.Command) (any, error) {
 	typeCmd := reflect.TypeOf(cmd)
-	if helpers.IsPtr(typeCmd) {
+	if is.Ptr(cmd) {
 		typeCmd = typeCmd.Elem()
 	}
 	typeName := typeCmd.String()
 	handler, exists := m.handlers[typeName]
 	if !exists {
 		return nil, handlerNotFountError
-	}
-	if h, ok := handler.(types.HandlerType); ok {
+	} else if h, ok := handler.(types.HandlerType); ok {
 		return h.Handle(ctx, cmd)
 	}
 

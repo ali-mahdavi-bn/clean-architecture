@@ -38,6 +38,8 @@ func New(cfg Config) (*gorm.DB, error) {
 	}
 
 	ormCfg := &gorm.Config{
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   cfg.TablePrefix,
 			SingularTable: true,

@@ -1,20 +1,27 @@
 package user_management
 
 import (
-	"clean-hex/internal/user_management/adapter/repositories"
+	unit_of_work "clean-hex/internal"
 	"clean-hex/internal/user_management/domain"
-	handlers "clean-hex/internal/user_management/service_layer/handlers/user"
+	"clean-hex/internal/user_management/service_layer/handlers/trade"
+	"clean-hex/internal/user_management/service_layer/handlers/user"
 	"clean-hex/pkg/framwork/service_layer/messagebus"
 	"gorm.io/gorm"
 )
 
 func Bootstrap(db *gorm.DB) *messagebus.MessageBus {
-	user_repo := repositories.NewUserGormRepository(db)
+	uow := unit_of_work.NewGormUnitOfWorkImp(db)
+	bus := messagebus.NewMessageBus(uow)
 
-	bus := messagebus.NewMessageBus(db)
-	bus.Register(domain.CreateUserCommand{}, handlers.NewCreateUserHandler(user_repo))
-	bus.Register(domain.UpdateUserCommand{}, handlers.NewUpdateUserHandler(user_repo))
-	bus.Register(domain.DeleteUserCommand{}, handlers.NewDeleteUserHandler(user_repo))
+	// user
+	bus.Register(domain.CreateUserCommand{}, user.NewCreateUserCommandHandler(bus.Uow))
+	bus.Register(domain.UpdateUserCommand{}, user.NewUpdateUserHandler(bus.Uow))
+	bus.Register(domain.DeleteUserCommand{}, user.NewDeleteUserHandler(bus.Uow))
+
+	// trade
+	bus.Register(domain.CreateTradeCommand{}, trade.NewCreateTradeCommandHandler(bus.Uow))
+	bus.Register(domain.UpdateTradeCommand{}, trade.NewUpdateTradeHandler(bus.Uow))
+	bus.Register(domain.DeleteTradeCommand{}, trade.NewDeleteTradeHandler(bus.Uow))
 
 	return bus
 }

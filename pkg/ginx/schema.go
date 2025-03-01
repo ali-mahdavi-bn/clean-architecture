@@ -1,51 +1,35 @@
 package ginx
 
-import "clean-hex/pkg/errors"
+import "clean-hex/pkg/framwork/errors"
+
+type Direction string
 
 const (
-	ReqBodyKey        = "req-body"
-	ResBodyKey        = "res-body"
-	TreePathDelimiter = "."
+	ResBodyKey           = "res-body"
+	ASC        Direction = "ASC"
+	DESC       Direction = "DESC"
 )
 
 type ResponseResult struct {
 	Success bool          `json:"success"`
 	Data    interface{}   `json:"data,omitempty"`
 	Total   int64         `json:"total,omitempty"`
+	Page    int64         `json:"page,omitempty"`
+	Pages   int64         `json:"pages,omitempty"`
 	Error   *errors.Error `json:"error,omitempty"`
 }
 
 type PaginationResult struct {
-	Total    int64 `json:"total"`
-	Current  int   `json:"current"`
-	PageSize int   `json:"pageSize"`
+	Total   int64         `json:"total"`
+	Skip    int64         `json:"skip"`
+	Limit   int64         `json:"limit"`
+	OrderBy OrderByParams `json:"order_by"`
 }
-
-type PaginationParam struct {
-	Pagination bool `form:"-"`
-	OnlyCount  bool `form:"-"`
-	Current    int  `form:"current"`
-	PageSize   int  `form:"pageSize" binding:"max=100"`
-}
-
-type QueryOptions struct {
-	SelectFields []string
-	OmitFields   []string
-	OrderFields  OrderByParams
-}
-
-type Direction string
-
-const (
-	ASC  Direction = "ASC"
-	DESC Direction = "DESC"
-)
 
 type OrderByParam struct {
 	Field     string
 	Direction Direction
 }
-
 type OrderByParams []OrderByParam
 
 func (a OrderByParams) ToSQL() string {

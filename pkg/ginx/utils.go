@@ -1,11 +1,12 @@
 package ginx
 
 import (
-	"clean-hex/pkg/errors"
+	"clean-hex/pkg/framwork/errors"
 	"encoding/json"
-	
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"math"
 	"net/http"
 	"reflect"
 	"strings"
@@ -46,6 +47,19 @@ func ParseQuery(c *gin.Context, obj interface{}) error {
 	return nil
 }
 
+// Parse Pagination query parameter to struct
+func ParsePaginationQueryParam(c *gin.Context, obj *PaginationResult) error {
+	if err := c.ShouldBindQuery(obj); err != nil {
+		return errors.BadRequest("FailedParseQuery", err.Error())
+	}
+
+	fmt.Println(obj.Limit)
+	if obj.Limit < 1 {
+		obj.Limit = 10
+	}
+	return nil
+}
+
 // Parse body form data to struct
 func ParseForm(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindWith(obj, binding.Form); err != nil {
@@ -79,21 +93,37 @@ func ResOK(c *gin.Context) {
 	})
 }
 
+func CalculatePagination(total, limit, skip int64) (int64, int64) {
+	pages := int64(math.Ceil(float64(total) / float64(limit)))
+	page := (skip / limit) + 1
+	return pages, page
+}
+
 func ResPage(c *gin.Context, v interface{}, pr *PaginationResult) {
-	var total int64
+	var total, pages, page int64
 	if pr != nil {
 		total = pr.Total
+		pages, page = CalculatePagination(total, pr.Limit, pr.Skip)
 	}
-
+	if page < 1 {
+		page = 1
+	}
+	if pages < 1 {
+		pages = 1
+	}
+	if page > pages {
+		page = pages
+	}
 	reflectValue := reflect.Indirect(reflect.ValueOf(v))
 	if reflectValue.IsNil() {
 		v = make([]interface{}, 0)
 	}
-
 	ResJSON(c, http.StatusOK, ResponseResult{
 		Success: true,
 		Data:    v,
 		Total:   total,
+		Page:    page,
+		Pages:   pages,
 	})
 }
 

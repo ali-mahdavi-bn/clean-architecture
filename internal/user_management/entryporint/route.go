@@ -1,71 +1,33 @@
 package entryporint
 
 import (
-	"clean-hex/internal/user_management/domain"
-	queries "clean-hex/internal/user_management/service_layer/queries/user"
+	"clean-hex/pkg/framwork/service_layer/cache"
 	"clean-hex/pkg/framwork/service_layer/messagebus"
-	"clean-hex/pkg/ginx"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 )
 
-func RegisterV1Routers(bus *messagebus.MessageBus, g *gin.RouterGroup) {
-	r := g.Group("/v1/user")
+var Bus *messagebus.MessageBus
+var RedisStore cache.Store
 
-	r.POST("", func(c *gin.Context) {
-		ctx := c.Request.Context()
-		item := new(domain.CreateUserCommand)
-		if err := ginx.ParseJSON(c, item); err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		result, err := bus.Handle(ctx, *item)
-		if err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		ginx.ResSuccess(c, result)
-	})
-
-	r.GET("/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		result, err := queries.ViewGetUser(bus.DB, cast.ToUint(id))
-
-		if err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		ginx.ResSuccess(c, result)
-	})
-
-	r.PUT("/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		ctx := c.Request.Context()
-		item := new(domain.UpdateUserCommand)
-		if err := ginx.ParseJSON(c, item); err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		item.UserId = cast.ToUint(id)
-
-		result, err := bus.Handle(ctx, *item)
-		if err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		ginx.ResSuccess(c, result)
-	})
-	r.DELETE("/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		ctx := c.Request.Context()
-		item := new(domain.DeleteUserCommand)
-		item.UserId = cast.ToUint(id)
-		result, err := bus.Handle(ctx, *item)
-		if err != nil {
-			ginx.ResError(c, err)
-			return
-		}
-		ginx.ResSuccess(c, result)
-	})
+// https://github.com/IBM/sarama
+func RegisterV1Routers(bus *messagebus.MessageBus, routerGroup *gin.RouterGroup, redisStore cache.Store) {
+	Bus = bus
+	RedisStore = redisStore
+	userRoute := routerGroup.Group("/v1/user")
+	{
+		userRoute.POST("", CreateUserHandler)
+		userRoute.GET("/:userId", GetUserHandler)
+		userRoute.GET("", ViewUserHandler)
+		userRoute.PUT("/:userId", UpdateUserHandler)
+		userRoute.DELETE("/:userId", DeleteUserHandler)
+	}
+	tradeRoute := userRoute.Group("/:userId/trade")
+	{
+		tradeRoute.POST("", CreateTradeHandler)
+		//tradeRoute.GET("/:id", GetUserHandler)
+		tradeRoute.GET("", ViewTradeHandler)
+		//tradeRoute.PUT("/:id", UpdateUserHandler)
+		//tradeRoute.DELETE("/:id", DeleteUserHandler)
+	}
 
 }

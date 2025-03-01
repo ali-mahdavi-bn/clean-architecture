@@ -4,6 +4,7 @@ import (
 	"clean-hex/internal/user_management/adapter/repositories"
 	"clean-hex/internal/user_management/domain/entities"
 	"errors"
+	"gorm.io/gorm"
 
 	"context"
 )
@@ -35,8 +36,8 @@ func NewFakeUserRepository() repositories.UserRepository {
 	userRepo.On("Save", ctx, &entities.User{UserName: "ali", Age: 20}).Return(nil)
 	userRepo.On("Save", ctx, &entities.User{UserName: "NewAli", Age: 20}).Return(nil)
 	userRepo.On("FindByUserName", ctx, "ali").Return(&entities.User{UserName: "ali", Age: 20}, nil)
-	userRepo.On("FindByUserName", ctx, "NewAli").Return((*entities.User)(nil), errors.New("User.NotFound"))
-	userRepo.On("FindByUserName", ctx, "Bob").Return((*entities.User)(nil), errors.New("User.AlreadyExists"))
+	userRepo.On("FindByUserName", ctx, "NewAli").Return((*entities.User)(nil), gorm.ErrRecordNotFound)
+	userRepo.On("FindByUserName", ctx, "Bob").Return((*entities.User)(nil), gorm.ErrRecordNotFound)
 	userRepo.On("FindByUsernameExcludingID", ctx, "Bob").Return((*entities.User)(nil), errors.New("User.AlreadyExists"))
 	return userRepo
 }

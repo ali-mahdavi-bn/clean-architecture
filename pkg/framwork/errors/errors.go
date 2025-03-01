@@ -3,7 +3,7 @@
 package errors
 
 import (
-	"clean-hex/pkg/errors/phrases"
+	"clean-hex/pkg/framwork/errors/phrases"
 	"encoding/json"
 	"fmt"
 	"net/http"

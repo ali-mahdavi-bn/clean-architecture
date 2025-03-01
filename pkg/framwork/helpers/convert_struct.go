@@ -18,7 +18,7 @@ func Convert(from interface{}, to interface{}) error {
 	toValuePtr := reflect.ValueOf(to)
 	toTypePtr := toValuePtr.Type()
 
-	if !IsPtr(toTypePtr) {
+	if !isPtr(toTypePtr) {
 		return fmt.Errorf("TO value provided was not a pointer, unable to set value: %v", to)
 	}
 
@@ -45,7 +45,7 @@ func getValue(fromValue reflect.Value, targetType reflect.Type) (reflect.Value, 
 	var toValue reflect.Value
 
 	// handle incoming pointer Types
-	if IsPtr(fromType) {
+	if isPtr(fromType) {
 		if fromValue.IsNil() {
 			return nilValue, nil
 		}
@@ -57,7 +57,7 @@ func getValue(fromValue reflect.Value, targetType reflect.Type) (reflect.Value, 
 	}
 
 	baseTargetType := targetType
-	if IsPtr(targetType) {
+	if isPtr(targetType) {
 		baseTargetType = targetType.Elem()
 	}
 
@@ -154,7 +154,7 @@ func getValue(fromValue reflect.Value, targetType reflect.Type) (reflect.Value, 
 	}
 
 	// handle non-pointer returns -- the reflect.New earlier always creates a pointer
-	if !IsPtr(baseTargetType) {
+	if !isPtr(baseTargetType) {
 		toValue = fromPtr(toValue)
 	}
 
@@ -165,7 +165,7 @@ func getValue(fromValue reflect.Value, targetType reflect.Type) (reflect.Value, 
 	}
 
 	// handle elements which are now pointers
-	if IsPtr(targetType) {
+	if isPtr(targetType) {
 		toValue = toPtr(toValue)
 	}
 
@@ -241,7 +241,7 @@ func convertValueTypes(value reflect.Value, targetType reflect.Type) (reflect.Va
 	return nilValue, fmt.Errorf("unable to convert from: %v to %v", value.Interface(), targetType.Name())
 }
 
-func IsPtr(typ reflect.Type) bool {
+func isPtr(typ reflect.Type) bool {
 	return typ.Kind() == reflect.Ptr
 }
 
@@ -304,7 +304,7 @@ func isMap(typ reflect.Type) bool {
 
 func toPtr(val reflect.Value) reflect.Value {
 	typ := val.Type()
-	if !IsPtr(typ) {
+	if !isPtr(typ) {
 		// this creates a pointer type inherently
 		ptrVal := reflect.New(typ)
 		ptrVal.Elem().Set(val)
@@ -314,7 +314,7 @@ func toPtr(val reflect.Value) reflect.Value {
 }
 
 func fromPtr(val reflect.Value) reflect.Value {
-	if IsPtr(val.Type()) {
+	if isPtr(val.Type()) {
 		val = val.Elem()
 	}
 	return val

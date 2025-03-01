@@ -6,7 +6,7 @@ var ErrorMessages = map[string]string{
 	"User.NotFound":    "کاربر پیدا نشد",
 	"User.AgeInvalid":  "سن کاربر کمتر از ۱۸ است",
 	"User.Invalid":     "اطلاعات کاربر درست نمیباشد",
-	"CanNot.Operation": "عملیات موفق آمیز نبود. لطفا بعدا تلاش بفرمایید",
+	"Operation.CanNot": "عملیات موفق آمیز نبود. لطفا دوباره تلاش بفرمایید",
 
 	//en
 	"FailedParseJson":  "Failed to parse json: %s",

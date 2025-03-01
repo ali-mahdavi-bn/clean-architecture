@@ -4,37 +4,8 @@ import (
 	"clean-hex/pkg/framwork/adapter"
 	"context"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
-
-//
-//type FakRepository[E adapter.Entity] struct {
-//	Data []E
-//}
-//
-//func NewFakeRepository[E adapter.Entity]() *FakRepository[E] {
-//	return &FakRepository[E]{}
-//}
-//
-//func (c *FakRepository[E]) FindByID(ctx context.Context, id uint) (E, error) {
-//	var e E
-//	for _, entity := range c.Data {
-//		if entity.GetID() == id {
-//			return entity, nil
-//		}
-//	}
-//	return e, errors.New("user not found")
-//}
-//
-//func (c *FakRepository[E]) FindByField(ctx context.Context, field string, value interface{}) (E, error) {
-//	var e E
-//
-//	return e, nil
-//}
-//
-//func (c *FakRepository[E]) Save(ctx context.Context, model E) error {
-//	c.Data = append(c.Data, model)
-//	return nil
-//}
 
 type FakRepository[E adapter.Entity] struct {
 	mock.Mock
@@ -70,4 +41,9 @@ func (c *FakRepository[E]) Remove(ctx context.Context, model E) error {
 func (c *FakRepository[E]) Save(ctx context.Context, model E) error {
 	args := c.Called(ctx, model)
 	return args.Error(0)
+}
+
+func (c *FakRepository[E]) Model(ctx context.Context) *gorm.DB {
+	args := c.Called(ctx)
+	return args.Get(0).(*gorm.DB)
 }
