@@ -3,7 +3,6 @@ package ginx
 import (
 	"clean-hex/pkg/framwork/errors"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"math"
@@ -53,7 +52,6 @@ func ParsePaginationQueryParam(c *gin.Context, obj *PaginationResult) error {
 		return errors.BadRequest("FailedParseQuery", err.Error())
 	}
 
-	fmt.Println(obj.Limit)
 	if obj.Limit < 1 {
 		obj.Limit = 10
 	}

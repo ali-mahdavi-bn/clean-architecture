@@ -7,6 +7,7 @@ import (
 	"clean-hex/pkg/framwork/service_layer/cache"
 	"clean-hex/pkg/ginx"
 	"context"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -17,14 +18,15 @@ func ViewTrade(ctx context.Context, userId uint, uow internal.UnitOfWorkImp, cac
 	}
 	key := cache.CreateKey("user", userId, "trade", "order", param.OrderBy.ToSQL(), "limit", param.Limit, "skip", param.Skip)
 	err := cache.Cache(ctx, key, result, time.Second*2, func(ctx context.Context) (any, error) {
+		fmt.Println("mkkmkmkmkmkkmkkm")
 		return uow.Do(ctx, func(ctx context.Context, tx *gorm.DB) (any, error) {
-			user := new([]entities.Trade)
-			if uow.Trade().Model(ctx).Where("user_id = ?", userId).Limit(int(param.Limit)).Offset(int(param.Skip)).Order(param.OrderBy.ToSQL()).Find(user).Count(&result.Total).Error != nil {
+			trades := new([]entities.Trade)
+			if uow.Trade().Model(ctx).Where("user_id = ?", userId).Limit(int(param.Limit)).Offset(int(param.Skip)).Order(param.OrderBy.ToSQL()).Find(trades).Count(&result.Total).Error != nil {
 				return nil, errors.BadRequest("Operation.CanNot")
 			}
 
 			result.Pages, result.Page = ginx.CalculatePagination(result.Total, param.Limit, param.Skip)
-			result.Data = user
+			result.Data = trades
 			result.Success = true
 			return result, nil
 		})

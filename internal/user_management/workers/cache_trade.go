@@ -27,20 +27,20 @@ func CacheTrade(uow unit_of_work.UnitOfWorkImp, cache cache.Store) {
 				if err := json.Unmarshal(msg.Value, trade); err != nil {
 					break kafkaBreak
 				}
-				users := new([]entities.Trade)
 				key := cache.CreateKey("user", trade.UserID, "trade", "order", "", "limit", 10, "skip", 0)
 				result := &ginx.ResponseResult{
-					Success: true,
+					Success: false,
 				}
-				err := cache.Cache(ctx, key, users, time.Minute, func(ctx context.Context) (any, error) {
+				err := cache.Cache(ctx, key, result, time.Second*2, func(ctx context.Context) (any, error) {
 					return uow.Do(ctx, func(ctx context.Context, tx *gorm.DB) (any, error) {
-						user := new([]entities.Trade)
-						if uow.Trade().Model(ctx).Where("user_id = ?", trade.UserID).Limit(10).Offset(0).Order("id").Find(user).Count(&result.Total).Error != nil {
+						trades := new([]entities.Trade)
+						if uow.Trade().Model(ctx).Where("user_id = ?", trade.UserID).Limit(10).Find(trades).Count(&result.Total).Error != nil {
 							return nil, errors.BadRequest("Operation.CanNot")
 						}
-						result.Pages, result.Page = ginx.CalculatePagination(result.Total, 10, 0)
-						result.Data = user
 
+						result.Pages, result.Page = ginx.CalculatePagination(result.Total, 10, 0)
+						result.Data = trades
+						result.Success = true
 						return result, nil
 					})
 				})

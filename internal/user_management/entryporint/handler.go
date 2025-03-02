@@ -5,7 +5,6 @@ import (
 	"clean-hex/internal/user_management/service_layer/queries/trade"
 	"clean-hex/internal/user_management/service_layer/queries/user"
 	"clean-hex/pkg/ginx"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 	"net/http"
@@ -113,7 +112,6 @@ func ViewTradeHandler(c *gin.Context) {
 
 	result, err := trade.ViewTrade(ctx, cast.ToUint(c.Param("userId")), Bus.Uow, RedisStore, params)
 	if err != nil {
-		fmt.Println(err)
 		ginx.ResError(c, err)
 		return
 	}
