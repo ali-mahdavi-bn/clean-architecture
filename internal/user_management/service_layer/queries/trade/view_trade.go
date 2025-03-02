@@ -18,7 +18,7 @@ func ViewTrade(ctx context.Context, userId uint, uow internal.UnitOfWorkImp, cac
 	}
 	key := cache.CreateKey("user", userId, "trade", "order", param.OrderBy.ToSQL(), "limit", param.Limit, "skip", param.Skip)
 	err := cache.Cache(ctx, key, result, time.Second*2, func(ctx context.Context) (any, error) {
-		fmt.Println("mkkmkmkmkmkkmkkm")
+		fmt.Println(".......db hit.........")
 		return uow.Do(ctx, func(ctx context.Context, tx *gorm.DB) (any, error) {
 			trades := new([]entities.Trade)
 			if uow.Trade().Model(ctx).Where("user_id = ?", userId).Limit(int(param.Limit)).Offset(int(param.Skip)).Order(param.OrderBy.ToSQL()).Find(trades).Count(&result.Total).Error != nil {

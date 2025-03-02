@@ -28,25 +28,29 @@ func CacheTrade(uow unit_of_work.UnitOfWorkImp, cache cache.Store) {
 					break kafkaBreak
 				}
 				key := cache.CreateKey("user", trade.UserID, "trade", "order", "", "limit", 10, "skip", 0)
-				result := &ginx.ResponseResult{
-					Success: false,
-				}
-				err := cache.Cache(ctx, key, result, time.Second*2, func(ctx context.Context) (any, error) {
-					return uow.Do(ctx, func(ctx context.Context, tx *gorm.DB) (any, error) {
-						trades := new([]entities.Trade)
-						if uow.Trade().Model(ctx).Where("user_id = ?", trade.UserID).Limit(10).Find(trades).Count(&result.Total).Error != nil {
-							return nil, errors.BadRequest("Operation.CanNot")
-						}
 
-						result.Pages, result.Page = ginx.CalculatePagination(result.Total, 10, 0)
-						result.Data = trades
-						result.Success = true
-						return result, nil
-					})
+				result, err := uow.Do(ctx, func(ctx context.Context, tx *gorm.DB) (any, error) {
+					result := &ginx.ResponseResult{
+						Success: false,
+					}
+					trades := new([]entities.Trade)
+					if uow.Trade().Model(ctx).Where("user_id = ?", trade.UserID).Limit(10).Find(trades).Count(&result.Total).Error != nil {
+						return nil, errors.BadRequest("Operation.CanNot")
+					}
+
+					result.Pages, result.Page = ginx.CalculatePagination(result.Total, 10, 0)
+					result.Data = trades
+					result.Success = true
+					return result, nil
 				})
 				if err != nil {
 					break kafkaBreak
 				}
+				err = cache.SetValue(ctx, key, result, time.Minute)
+				if err != nil {
+					break kafkaBreak
+				}
+
 			case err := <-pc.Errors():
 				log.Printf("Error: %v\n", err)
 			}
