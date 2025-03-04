@@ -4,10 +4,10 @@ import "clean-hex/pkg/framwork/adapter"
 
 type Trade struct {
 	adapter.BaseEntity
-	UserID uint   `gorm:"index"`
-	Stock  string `gorm:"not null"`
-	Price  int    `gorm:"not null"`
-	Amount int    `gorm:"not null"`
+	UserID uint
+	Stock  string
+	Price  int
+	Amount int
 }
 
 func NewTrade(userID uint, stock string, price int, amount int) (*Trade, error) {
